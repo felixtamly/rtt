@@ -11,7 +11,10 @@ def calculate_delay_repay(operator, delay):
         | ((operator == 'Northern') & (delay >= 15))
         | ((operator == 'East Midlands Railway') & (delay >= 15))
         | ((operator == 'Transpennine Express') & (delay >= 15))
-        | ((operator == 'Great Western Railway') & (delay >= 15))):
+        | ((operator == 'Great Western Railway') & (delay >= 15))
+        | ((operator == 'South Western Railway') & (delay >= 15))
+        | ((operator == 'Southern') & (delay >= 15))
+        | ((operator == 'ScotRail') & (delay >= 30))):
         return 'Y'
     return 'N'
 
@@ -83,6 +86,7 @@ for row, journey in my_train_journeys_to_process.iterrows():
         print('Destination ' + dest + ' at ' + dest_scheduled_arrival_time + ' / ' + dest_real_arrival_time)
 
         if ((boarded_at_stop_number > -1) & (alighted_at_stop_number > -1) & (boarded_at_stop_number < alighted_at_stop_number)):
+            row_to_update = "F" + str(row + 2)
             journey['Operator']     = operator
             journey['ORG']          = origin
             journey['ORG-ST']       = origin_scheduled_departure_time
@@ -99,33 +103,25 @@ for row, journey in my_train_journeys_to_process.iterrows():
             journey['Delay (min)']  = delay
             journey['Delay Repay']  = delay_repay
             journey['Processed']    = 'Y'
-            print(journey)
 
-            worksheet.update_cell(row + 2, 6, operator)
-            worksheet.update_cell(row + 2, 7, origin)
-            worksheet.update_cell(row + 2, 8, '\'' + str(origin_scheduled_departure_time))
-            worksheet.update_cell(row + 2, 9, '\'' + str(origin_real_departure_time))
-            # worksheet.update_cell(row + 2, 12, boarded_at)
-            worksheet.update_cell(row + 2, 11, '\'' + str(boarded_at_scheduled_departure_time))
-            worksheet.update_cell(row + 2, 12, '\'' + str(boarded_at_real_departure_time))
-            # worksheet.update_cell(row + 2, 15, alighted_at)
-            worksheet.update_cell(row + 2, 14, '\'' + str(alighted_at_scheduled_arrival_time))
-            worksheet.update_cell(row + 2, 15, '\'' + str(alighted_at_real_arrival_time))
-            worksheet.update_cell(row + 2, 16, dest)
-            worksheet.update_cell(row + 2, 17, '\'' + str(dest_scheduled_arrival_time))
-            worksheet.update_cell(row + 2, 18, '\'' + str(dest_real_arrival_time))
-            worksheet.update_cell(row + 2, 19, delay)
-            worksheet.update_cell(row + 2, 20, delay_repay)
-            worksheet.update_cell(row + 2, 21, 'Y')
+            worksheet.update(range_name=row_to_update, values=[[
+                operator
+                , origin
+                , origin_scheduled_departure_time
+                , origin_real_departure_time
+                , boarded_at
+                , boarded_at_scheduled_departure_time
+                , boarded_at_real_departure_time
+                , alighted_at
+                , alighted_at_scheduled_arrival_time
+                , alighted_at_real_arrival_time
+                , dest
+                , dest_scheduled_arrival_time
+                , dest_real_arrival_time
+                , delay
+                , delay_repay
+                , 'Y'
+            ]])
+            worksheet.format(str(row + 2) + ":" + str(row + 2), {"horizontalAlignment": "LEFT"})
 
             print('Updated!')
-            
-
-        
-
-
-
-
-
-
-
