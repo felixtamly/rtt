@@ -1,5 +1,6 @@
 from datetime import datetime
 from dotenv import dotenv_values
+from gspread_formatting import *
 import gspread
 import pandas as pd
 import pprint
@@ -123,5 +124,9 @@ for row, journey in my_train_journeys_to_process.iterrows():
                 , 'Y'
             ]])
             worksheet.format(str(row + 2) + ":" + str(row + 2), {"horizontalAlignment": "LEFT"})
+            date_format = CellFormat(
+                    numberFormat=NumberFormat(type='DATE', pattern='yyyy-MM-dd')
+                )
+            format_cell_range(worksheet, "C" + str(row + 2), date_format)
 
             print('Updated!')
