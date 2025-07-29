@@ -31,13 +31,13 @@ my_train_journeys = pd.DataFrame(worksheet.get_all_records())
 my_train_journeys_to_process = my_train_journeys.loc[my_train_journeys['Processed'] == '']
 
 for row, journey in my_train_journeys_to_process.iterrows():
-    print(row)
-    service_uid         = journey['Service UID:']
-    date_of_travel      = datetime.strptime(journey['Date:'], '%d/%m/%Y').strftime('%Y/%m/%d')
-    boarded_at          = journey['Boarded at:']
-    alighted_at         = journey['Alighted at:']
+    # print(row, journey)
+    service_uid         = journey['Service UID']
+    date_of_travel      = datetime.strptime(journey['Date'], '%d/%m/%Y').strftime('%Y/%m/%d')
+    boarded_at          = journey['Boarded at']
+    alighted_at         = journey['Alighted at']
     class_number        = journey['Class']
-    number_of_coaches   = journey['Number of coaches:']
+    number_of_coaches   = journey['Number of coaches']
     print(service_uid, (date_of_travel), boarded_at, alighted_at, class_number, number_of_coaches)
 
     response = requests.get(f'https://api.rtt.io/api/v1/json/service/{service_uid}/{date_of_travel}', auth=(api_username, api_password)).json()
