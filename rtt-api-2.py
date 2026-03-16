@@ -31,7 +31,8 @@ def calculate_delay_repay(operator, delay):
 api_username = os.environ["API_USERNAME"]
 api_password = os.environ["API_PASSWORD"]
 
-scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+scopes = ["https://www.googleapis.com/auth/spreadsheets",
+          "https://www.googleapis.com/auth/drive"]
 
 creds = Credentials.from_service_account_file(
     "creds.json",
