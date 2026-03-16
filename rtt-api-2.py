@@ -1,10 +1,12 @@
 from datetime import datetime
 from dotenv import dotenv_values
 from gspread_formatting import *
+from google.oauth2.service_account import Credentials
 import gspread
 import pandas as pd
 import pprint
 import requests
+import os
 
 def calculate_delay_repay(operator, delay):
     if (((operator == 'CrossCountry') & (delay >= 30))
@@ -21,12 +23,28 @@ def calculate_delay_repay(operator, delay):
     return 'N'
 
 #Define API user details
-my_secrets = dotenv_values(".env")
-api_username = my_secrets['API_USERNAME']
-api_password = my_secrets['API_PASSWORD']
+# my_secrets = dotenv_values(".env")
+# api_username = my_secrets['API_USERNAME']
+# api_password = my_secrets['API_PASSWORD']
 
-gc = gspread.service_account()
-sh = gc.open('My_Train_Journeys_New_2')
+#Define API user details (Github Actions)
+api_username = os.environ["API_USERNAME"]
+api_password = os.environ["API_PASSWORD"]
+
+scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+
+creds = Credentials.from_service_account_file(
+    "creds.json",
+    scopes=scopes
+)
+
+#Local
+# gc = gspread.service_account()
+# sh = gc.open('My_Train_Journeys_New_2')
+
+#Github Actions
+gc = gspread.authorize(creds)
+sh = gc.open("My_Train_Journeys_New_2")
 worksheet = sh.get_worksheet(0)
 my_train_journeys = pd.DataFrame(worksheet.get_all_records())
 my_train_journeys_to_process = my_train_journeys.loc[my_train_journeys['Processed'] == '']
