@@ -14,6 +14,7 @@ def calculate_delay_repay(operator, delay):
         | ((operator == 'Transpennine Express') & (delay >= 15))
         | ((operator == 'Great Western Railway') & (delay >= 15))
         | ((operator == 'South Western Railway') & (delay >= 15))
+        | ((operator == 'Transport for Wales') & (delay >= 15))
         | ((operator == 'Southern') & (delay >= 15))
         | ((operator == 'ScotRail') & (delay >= 30))):
         return 'Y'
@@ -44,6 +45,7 @@ for row, journey in my_train_journeys_to_process.iterrows():
 
     if 'error' not in response:
         operator = response['atocName']
+        train_class = response['trainClass']
 
         origin                          = response['locations'][0]['crs']
         origin_scheduled_departure_time = response['locations'][0]['gbttBookedDeparture']
@@ -80,6 +82,7 @@ for row, journey in my_train_journeys_to_process.iterrows():
                 delay = int((datetime.strptime(alighted_at_real_arrival_time, '%H%M') - datetime.strptime(alighted_at_scheduled_arrival_time, '%H%M')).total_seconds() / 60)
                 delay_repay = calculate_delay_repay(operator, delay)
 
+        print('Train class ' + train_class)
         print('Operator ' + operator)
         print('Origin ' + origin + ' at ' + origin_scheduled_departure_time + ' / ' + origin_real_departure_time)
         print('Boarded at station number ' + str(boarded_at_stop_number) + ' at ' + boarded_at_real_departure_time + ' / ' + boarded_at_scheduled_departure_time)
