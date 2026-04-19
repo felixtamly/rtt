@@ -1,0 +1,31 @@
+name: Run Python Script
+
+on:
+  schedule:
+    - cron: "0 8,20 * * *"    # every hour
+  workflow_dispatch:      # allows manual run
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    env:
+      API_TOKEN: ${{ secrets.API_TOKEN }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT }}' > creds.json  
+
+      - name: Run script
+        run: python rtt-api-3.py
