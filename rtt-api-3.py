@@ -25,8 +25,13 @@ def calculate_delay_repay(operator, delay):
 
 url_access = "https://data.rtt.io/api/get_access_token"
 
+#Define API user details
+#Local
+# my_secrets = dotenv_values(".env")
+# api_token = my_secrets['API_TOKEN']
+#Github Actions
 api_token = os.environ["API_TOKEN"]
-headers_access = {"Authorization": "Bearer {api_token}"}
+headers_access = {"Authorization": f"Bearer {api_token}"}
 response_access = requests.get(url_access, headers=headers_access)
 
 data_access = response_access.json()
@@ -36,12 +41,14 @@ access_token = data_access["token"]
 scopes = ["https://www.googleapis.com/auth/spreadsheets",
           "https://www.googleapis.com/auth/drive"]
 
+#Local
+# gc = gspread.service_account()
+# sh = gc.open('My_Train_Journeys_New_2')
+#Github Actions
 creds = Credentials.from_service_account_file(
     "creds.json",
     scopes=scopes
 )
-
-#Github Actions
 gc = gspread.authorize(creds)
 sh = gc.open("My_Train_Journeys_New_2")
 worksheet = sh.get_worksheet(0)
@@ -49,9 +56,8 @@ my_train_journeys = pd.DataFrame(worksheet.get_all_records())
 my_train_journeys_to_process = my_train_journeys.loc[my_train_journeys['Processed'] == '']
 
 for row, journey in my_train_journeys_to_process.iterrows():
-    # print(row, journey)
     service_uid         = journey['Service UID']
-    date_of_travel      = datetime.strptime(journey['Date'], '%d/%m/%Y').strftime('%Y/%m/%d')
+    date_of_travel      = datetime.strptime(journey['Date'], '%d/%m/%Y').strftime('%Y-%m-%d')
     boarded_at          = journey['Boarded at']
     alighted_at         = journey['Alighted at']
     class_number        = journey['Class']
@@ -98,7 +104,7 @@ for row, journey in my_train_journeys_to_process.iterrows():
         alighted_at_scheduled_arrival_time  = '0000'
         alighted_at_real_arrival_time       = '0000'
 
-        for stop_info in response['locations']:
+        for stop_info in response_json["service"]["locations"]:
             if stop_info["location"]["shortCodes"][0] == boarded_at:
                 boarded_at_stop_number = response_json["service"]["locations"].index(stop_info)
                 boarded_at_scheduled_departure_time = datetime.fromisoformat(stop_info["temporalData"]["departure"]["scheduleAdvertised"]).strftime("%H%M")
