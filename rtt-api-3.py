@@ -19,6 +19,7 @@ def calculate_delay_repay(operator, delay):
         | ((operator == 'South Western Railway') & (delay >= 15))
         | ((operator == 'Transport for Wales') & (delay >= 15))
         | ((operator == 'Southern') & (delay >= 15))
+        | ((operator == 'Greater Anglia') & (delay >= 15))
         | ((operator == 'ScotRail') & (delay >= 30))):
         return 'Y'
     return 'N'
