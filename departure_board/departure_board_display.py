@@ -30,7 +30,7 @@ def get_departure_board():
     headers = {"Authorization": f"Bearer {access_token}"}
 
     params = {
-        "code": "LDS",
+        "code": "WCK",
         "timeWindow": 60,
         }
 
@@ -41,60 +41,62 @@ def get_departure_board():
 
     if 'error' not in response:
         response_json = json.loads(response.text)
+
         station_full_name = response_json["query"]["location"]["description"]
 
-        for service in response_json["services"]:
-            if "departure" in service["temporalData"]:
-                destination = service["destination"][0]["location"]["description"]
-                scheduled_departure_time = service["temporalData"]["departure"]["scheduleAdvertised"]
-                scheduled_departure_time_print = scheduled_departure_time.split('T')[1][:5]
-                if "realtimeForecast" in service["temporalData"]["departure"]:
-                    estimated_departure_time = service["temporalData"]["departure"]["realtimeForecast"]
-                    estimated_departure_time_print = estimated_departure_time.split('T')[1][:5]
-                else:
-                    estimated_departure_time = scheduled_departure_time
-                    estimated_departure_time_print = scheduled_departure_time_print
-
-                scheduled_departure_time_dt = datetime.fromisoformat(scheduled_departure_time)
-                estimated_departure_time_dt = datetime.fromisoformat(estimated_departure_time)
-
-                if estimated_departure_time_dt > scheduled_departure_time_dt:
-                    delay = estimated_departure_time_dt - scheduled_departure_time_dt
-                    delay_minutes = int(delay.total_seconds() / 60)
-                else:
-                    delay_minutes = 0
-
-                cancelled = service["temporalData"]["departure"]["isCancelled"]
-                if cancelled == True:
-                    if "cancellationReasonCode" in service["temporalData"]["departure"]:
-                        cancellation_reason_code = service["temporalData"]["departure"]["cancellationReasonCode"]
-                        for reason in response_json["reasons"]:
-                            if reason["code"] == cancellation_reason_code:
-                                cancellation_reason = reason["longText"]
-
-                operator = service["scheduleMetadata"]["operator"]["name"]
-                if "platform" in service["locationMetadata"]:
-                    if "actual" in service["locationMetadata"]["platform"]:
-                        platform = service["locationMetadata"]["platform"]["actual"]
+        if "services" in response_json:
+            for service in response_json["services"]:
+                if "departure" in service["temporalData"]:
+                    destination = service["destination"][0]["location"]["description"]
+                    scheduled_departure_time = service["temporalData"]["departure"]["scheduleAdvertised"]
+                    scheduled_departure_time_print = scheduled_departure_time.split('T')[1][:5]
+                    if "realtimeForecast" in service["temporalData"]["departure"]:
+                        estimated_departure_time = service["temporalData"]["departure"]["realtimeForecast"]
+                        estimated_departure_time_print = estimated_departure_time.split('T')[1][:5]
                     else:
-                        platform = service["locationMetadata"]["platform"]["planned"]
-                elif "line" in service["locationMetadata"]:
-                    platform = service["locationMetadata"]["line"]["planned"]
-                else:
-                    platform = "--"
-                if "numberOfVehicles" in service["locationMetadata"]:
-                    number_of_coaches = service["locationMetadata"]["numberOfVehicles"]
-                else:
-                    number_of_coaches = "--"
+                        estimated_departure_time = scheduled_departure_time
+                        estimated_departure_time_print = scheduled_departure_time_print
 
-                services.append([platform, 
-                                operator, 
-                                destination, 
-                                scheduled_departure_time_print, 
-                                estimated_departure_time_print, 
-                                f"+{str(delay_minutes)}" if delay_minutes > 0 else "",
-                                number_of_coaches,
-                                f"Cancelled ({cancellation_reason})" if cancelled == True else ""])
+                    scheduled_departure_time_dt = datetime.fromisoformat(scheduled_departure_time)
+                    estimated_departure_time_dt = datetime.fromisoformat(estimated_departure_time)
+
+                    if estimated_departure_time_dt > scheduled_departure_time_dt:
+                        delay = estimated_departure_time_dt - scheduled_departure_time_dt
+                        delay_minutes = int(delay.total_seconds() / 60)
+                    else:
+                        delay_minutes = 0
+
+                    cancelled = service["temporalData"]["departure"]["isCancelled"]
+                    if cancelled == True:
+                        if "cancellationReasonCode" in service["temporalData"]["departure"]:
+                            cancellation_reason_code = service["temporalData"]["departure"]["cancellationReasonCode"]
+                            for reason in response_json["reasons"]:
+                                if reason["code"] == cancellation_reason_code:
+                                    cancellation_reason = reason["longText"]
+
+                    operator = service["scheduleMetadata"]["operator"]["name"]
+                    if "platform" in service["locationMetadata"]:
+                        if "actual" in service["locationMetadata"]["platform"]:
+                            platform = service["locationMetadata"]["platform"]["actual"]
+                        else:
+                            platform = service["locationMetadata"]["platform"]["planned"]
+                    elif "line" in service["locationMetadata"]:
+                        platform = service["locationMetadata"]["line"]["planned"]
+                    else:
+                        platform = "--"
+                    if "numberOfVehicles" in service["locationMetadata"]:
+                        number_of_coaches = service["locationMetadata"]["numberOfVehicles"]
+                    else:
+                        number_of_coaches = "--"
+
+                    services.append([platform, 
+                                    operator, 
+                                    destination, 
+                                    scheduled_departure_time_print, 
+                                    estimated_departure_time_print, 
+                                    f"+{str(delay_minutes)}" if delay_minutes > 0 else "",
+                                    number_of_coaches,
+                                    f"Cancelled ({cancellation_reason})" if cancelled == True else ""])
     
     return services, station_full_name
     
@@ -113,7 +115,7 @@ def dashboard():
                                       "Coaches",
                                       "Status"],
         tablefmt="html",
-        colalign=("left",) * len(services[0])
+        colalign=("left",) * len(services[0]) if services else None
     )
 
     now = datetime.now().strftime("%H:%M:%S")
