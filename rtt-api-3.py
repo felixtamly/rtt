@@ -95,7 +95,10 @@ for row, journey in my_train_journeys_to_process.iterrows():
         if response_json["service"]["locations"][-1]["temporalData"]["arrival"]["isCancelled"]:
             dest_real_arrival_time  = '0000'
         else:
-            dest_real_arrival_time  = datetime.fromisoformat(response_json["service"]['locations'][-1]["temporalData"]["arrival"]["realtimeActual"]).strftime("%H%M")
+            if "realtimeActual" in response_json["service"]['locations'][-1]["temporalData"]["arrival"]:
+                dest_real_arrival_time  = datetime.fromisoformat(response_json["service"]['locations'][-1]["temporalData"]["arrival"]["realtimeActual"]).strftime("%H%M")
+            else:
+                dest_real_arrival_time  = '0000'
 
         boarded_at_stop_number              = -1
         boarded_at_scheduled_departure_time = '0000'
