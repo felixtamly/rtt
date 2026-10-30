@@ -109,12 +109,12 @@ for row, journey in my_train_journeys_to_process.iterrows():
         alighted_at_real_arrival_time       = '0000'
 
         for stop_info in response_json["service"]["locations"]:
-            if stop_info["location"]["shortCodes"][0] == boarded_at:
+            if "shortCodes" in stop_info["location"] and stop_info["location"]["shortCodes"][0] == boarded_at:
                 boarded_at_stop_number = response_json["service"]["locations"].index(stop_info)
                 boarded_at_scheduled_departure_time = datetime.fromisoformat(stop_info["temporalData"]["departure"]["scheduleAdvertised"]).strftime("%H%M")
                 boarded_at_real_departure_time = datetime.fromisoformat(stop_info["temporalData"]["departure"]["realtimeActual"]).strftime("%H%M")
 
-            if stop_info["location"]["shortCodes"][0] == alighted_at:
+            if "shortCodes" in stop_info["location"] and stop_info["location"]["shortCodes"][0] == alighted_at:
                 alighted_at_stop_number = response_json["service"]["locations"].index(stop_info)
                 alighted_at_scheduled_arrival_time = datetime.fromisoformat(stop_info["temporalData"]["arrival"]["scheduleAdvertised"]).strftime("%H%M")
                 alighted_at_real_arrival_time = datetime.fromisoformat(stop_info["temporalData"]["arrival"]["realtimeActual"]).strftime("%H%M")
